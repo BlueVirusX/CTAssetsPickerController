@@ -27,17 +27,86 @@
 #import "NSBundle+CTAssetsPickerController.h"
 #import "CTAssetsPickerController.h"
 
+@interface UIApplication (Extension)
+
++ (BOOL)isAppExtension;
++ (UIApplication *)safeSharedApplication;
+
+@end
+
+@interface NSObject (NSInvocation)
+
+- (BOOL)performBoolSelector:(SEL)selector withParameters:(NSArray *)parameters;
+
+@end
+
 @implementation NSBundle (CTAssetsPickerController)
 
 + (NSBundle *)ctassetsPickerBundle
 {
-    return [NSBundle bundleWithPath:[NSBundle ctassetsPickerBundlePath]];
+  static NSBundle *bundle;
+  
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    bundle = [NSBundle bundleWithPath:[NSBundle ctassetsPickerBundlePath]];
+  });
+  
+  return bundle;
 }
 
 + (NSString *)ctassetsPickerBundlePath
 {
-    return [[NSBundle bundleForClass:[CTAssetsPickerController class]]
-            pathForResource:@"CTAssetsPickerController" ofType:@"bundle"];
+  static NSString *bundlePath;
+  
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    NSString *dir = [UIApplication isAppExtension] ? @"../../Frameworks/" : @"Frameworks/";
+    bundlePath = [[NSBundle mainBundle] pathForResource:[dir stringByAppendingString:@"CTAssetsPicker"] ofType:@"framework"];
+  });
+  
+  return bundlePath;
+}
+
+@end
+
+@implementation UIApplication (Extension)
+
++ (BOOL)isAppExtension
+{
+  return [[self class] safeSharedApplication] == nil;
+}
+
++ (UIApplication *)safeSharedApplication
+{
+  UIApplication *safeSharedApplication = nil;
+  
+  if ([UIApplication respondsToSelector:@selector(sharedApplication)]) {
+    safeSharedApplication = [UIApplication performSelector:@selector(sharedApplication)];
+  }
+  if (!safeSharedApplication.delegate) {
+    safeSharedApplication = nil;
+  }
+  
+  return safeSharedApplication;
+}
+
+@end
+
+@implementation NSObject (NSInvocation)
+
+- (BOOL)performBoolSelector:(SEL)selector withParameters:(NSArray *)parameters
+{
+  NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[[UIApplication class] instanceMethodSignatureForSelector:selector]];
+  [invocation setTarget:self];
+  [invocation setSelector:selector];
+  for (NSUInteger idx = 0; idx < parameters.count; idx++) {
+    id parameter = parameters[idx];
+    [invocation setArgument:&parameter atIndex:(NSInteger)idx + 2]; // Plus 2 is needed because idx 0 = self and idx 1 = _cmd
+  }
+  [invocation invoke];
+  BOOL returnValue;
+  [invocation getReturnValue:&returnValue];
+  return returnValue;
 }
 
 @end
