@@ -2,7 +2,7 @@
  
  MIT License (MIT)
  
- Copyright (c) 2013 Clement CN Tsang
+ Copyright (c) 2015 Clement CN Tsang
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -82,7 +82,7 @@
 
 - (NSString *)deviceModel
 {
-    return [[UIDevice currentDevice] model];
+    return [UIDevice currentDevice].model;
 }
 
 - (BOOL)isCameraDeviceAvailable
@@ -110,8 +110,11 @@
     if (!self.didSetupConstraints)
     {
         [self autoCenterInSuperview];
-        [self autoPinEdgeToSuperviewMargin:ALEdgeLeading];
-        [self autoPinEdgeToSuperviewMargin:ALEdgeTrailing];
+        
+        // suggested solution for issue #176
+        [self autoPinEdgeToSuperviewEdge:ALEdgeLeading withInset:self.layoutMargins.top];
+        [self autoPinEdgeToSuperviewEdge:ALEdgeTrailing withInset:self.layoutMargins.bottom];
+        
         
         [self.title autoAlignAxisToSuperviewAxis:ALAxisVertical];
         [self.title autoPinEdgesToSuperviewEdgesWithInsets:UIEdgeInsetsZero excludingEdge:ALEdgeBottom];

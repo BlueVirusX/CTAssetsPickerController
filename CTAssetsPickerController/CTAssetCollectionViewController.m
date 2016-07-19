@@ -2,7 +2,7 @@
  
  MIT License (MIT)
  
- Copyright (c) 2013 Clement CN Tsang
+ Copyright (c) 2015 Clement CN Tsang
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,7 @@
 #import "CTAssetsGridViewController.h"
 #import "PHAssetCollection+CTAssetsPickerController.h"
 #import "PHAsset+CTAssetsPickerController.h"
+#import "PHImageManager+CTAssetsPickerController.h"
 #import "NSBundle+CTAssetsPickerController.h"
 
 
@@ -77,7 +78,6 @@
 {
     [super viewDidLoad];
     [self setupViews];
-    [self setupButtons];
     [self localize];
     [self setupDefaultAssetCollection];
     [self setupFetchResults];
@@ -87,15 +87,10 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    [self setupButtons];
     [self updateTitle:self.picker.selectedAssets];
     [self updateButton:self.picker.selectedAssets];
     [self selectDefaultAssetCollection];
-}
-
-- (void)viewWillDisappear:(BOOL)animated
-{
-    [super viewWillDisappear:animated];
-    [self resetTitle];
 }
 
 - (void)dealloc
@@ -151,17 +146,26 @@
 
 - (void)setupButtons
 {
-    self.cancelButton =
-    [[UIBarButtonItem alloc] initWithTitle:CTAssetsPickerLocalizedString(@"Cancel", nil)
-                                     style:UIBarButtonItemStylePlain
-                                    target:self.picker
-                                    action:@selector(dismiss:)];
-
-    self.doneButton =
-    [[UIBarButtonItem alloc] initWithTitle:CTAssetsPickerLocalizedString(@"Done", nil)
-                                     style:UIBarButtonItemStyleDone
-                                    target:self.picker
-                                    action:@selector(finishPickingAssets:)];
+    if (self.doneButton == nil)
+    {
+        NSString *title = (self.picker.doneButtonTitle) ?
+        self.picker.doneButtonTitle : CTAssetsPickerLocalizedString(@"Done", nil);
+        
+        self.doneButton =
+        [[UIBarButtonItem alloc] initWithTitle:title
+                                         style:UIBarButtonItemStyleDone
+                                        target:self.picker
+                                        action:@selector(finishPickingAssets:)];
+    }
+    
+    if (self.cancelButton == nil)
+    {
+        self.cancelButton =
+        [[UIBarButtonItem alloc] initWithTitle:CTAssetsPickerLocalizedString(@"Cancel", nil)
+                                         style:UIBarButtonItemStylePlain
+                                        target:self.picker
+                                        action:@selector(dismiss:)];
+    }
 }
 
 - (void)localize
@@ -196,14 +200,27 @@
 - (void)updateAssetCollections
 {
     NSMutableArray *assetCollections = [NSMutableArray new];
-    
+
     for (PHFetchResult *fetchResult in self.fetchResults)
     {
         for (PHAssetCollection *assetCollection in fetchResult)
         {
-            NSInteger count = [assetCollection ctassetPikcerCountOfAssetsFetchedWithOptions:self.picker.assetsFetchOptions];
+            BOOL showsAssetCollection = YES;
             
-            if (self.picker.showsEmptyAlbums || count > 0)
+            if (!self.picker.showsEmptyAlbums)
+            {
+                PHFetchOptions *options = [PHFetchOptions new];
+                options.predicate = self.picker.assetsFetchOptions.predicate;
+                
+                if ([options respondsToSelector:@selector(setFetchLimit:)])
+                    options.fetchLimit = 1;
+                
+                NSInteger count = [assetCollection ctassetPikcerCountOfAssetsFetchedWithOptions:options];
+                
+                showsAssetCollection = (count > 0);
+            }
+            
+            if (showsAssetCollection)
                 [assetCollections addObject:assetCollection];
         }
     }
@@ -292,8 +309,7 @@
                 if (!updatedFetchResults)
                     updatedFetchResults = [self.fetchResults mutableCopy];
                 
-                [updatedFetchResults replaceObjectAtIndex:[self.fetchResults indexOfObject:fetchResult]
-                                               withObject:[changeDetails fetchResultAfterChanges]];
+                updatedFetchResults[[self.fetchResults indexOfObject:fetchResult]] = changeDetails.fetchResultAfterChanges;
             }
         }
         
@@ -424,7 +440,7 @@
         if (index < assets.count)
         {
             PHAsset *asset = assets[index];
-            [self.imageManager requestImageForAsset:asset
+            [self.imageManager ctassetsPickerRequestImageForAsset:asset
                                          targetSize:targetSize
                                         contentMode:PHImageContentModeAspectFill
                                             options:self.picker.thumbnailRequestOptions
@@ -470,6 +486,7 @@
     PHAssetCollection *collection = self.assetCollections[indexPath.row];
     
     CTAssetsGridViewController *vc = [CTAssetsGridViewController new];
+    vc.title = self.picker.selectedAssetsString ? : collection.localizedTitle;
     vc.assetCollection = collection;
     vc.delegate = self;
     
@@ -488,13 +505,14 @@
     if (self.defaultAssetCollection && !self.didShowDefaultAssetCollection)
     {
         CTAssetsGridViewController *vc = [CTAssetsGridViewController new];
+        vc.title = self.picker.selectedAssetsString ? : self.defaultAssetCollection.localizedTitle;
         vc.assetCollection = self.defaultAssetCollection;
         vc.delegate = self;
         
         UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
         nav.delegate = (id<UINavigationControllerDelegate>)self.picker;
         
-        [self.picker setShouldCollapseDetailViewController:NO];        
+        [self.picker setShouldCollapseDetailViewController:(self.picker.modalPresentationStyle == UIModalPresentationFormSheet)];
         [self.splitViewController showDetailViewController:nav sender:nil];
 
         NSIndexPath *indexPath = [self indexPathForAssetCollection:self.defaultAssetCollection];

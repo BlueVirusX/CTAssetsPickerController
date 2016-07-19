@@ -2,7 +2,7 @@
  
  MIT License (MIT)
  
- Copyright (c) 2013 Clement CN Tsang
+ Copyright (c) 2015 Clement CN Tsang
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -27,13 +27,12 @@
 #import <UIKit/UIKit.h>
 #import <Photos/Photos.h>
 
-
 @interface CTAssetThumbnailView : UIView
 
 @property (nonatomic, assign) BOOL showsDuration;
-@property (nonatomic, strong) UIImage *backgroundImage;
+@property (nonatomic, strong, nullable) UIImage *backgroundImage;
 
-- (void)bind:(UIImage *)image asset:(PHAsset *)asset;
-- (void)bind:(UIImage *)image assetCollection:(PHAssetCollection *)assetCollection;
+- (void)bind:(nullable UIImage *)image asset:(nullable PHAsset *)asset;
+- (void)bind:(nullable UIImage *)image assetCollection:(nullable PHAssetCollection *)assetCollection;
 
 @end

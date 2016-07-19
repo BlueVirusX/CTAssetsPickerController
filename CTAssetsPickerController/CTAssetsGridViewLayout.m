@@ -2,7 +2,7 @@
  
  MIT License (MIT)
  
- Copyright (c) 2013 Clement CN Tsang
+ Copyright (c) 2015 Clement CN Tsang
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@
     {
         CGFloat scale = traits.displayScale;
         NSInteger numberOfColumns = [self numberOfColumnsForTraitCollection:traits];
-        CGFloat onePixel = 1 / scale;
+        CGFloat onePixel = (scale == 3.0) ? (2.0 / scale) : (1.0 / scale);
         
         // spacing is as small as possible
         self.minimumInteritemSpacing = onePixel;

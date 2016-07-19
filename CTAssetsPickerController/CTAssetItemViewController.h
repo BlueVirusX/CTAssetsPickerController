@@ -2,7 +2,7 @@
  
  MIT License (MIT)
  
- Copyright (c) 2013 Clement CN Tsang
+ Copyright (c) 2015 Clement CN Tsang
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -27,16 +27,19 @@
 #import <UIKit/UIKit.h>
 #import <Photos/Photos.h>
 
-
+NS_ASSUME_NONNULL_BEGIN
 
 @interface CTAssetItemViewController : UIViewController
 
+@property (nonatomic, assign) BOOL allowsSelection;
 @property (nonatomic, strong, readonly) PHAsset *asset;
-@property (nonatomic, strong, readonly) UIImage *image;
+@property (nonatomic, strong, readonly, nullable) UIImage *image;
 
 + (CTAssetItemViewController *)assetItemViewControllerForAsset:(PHAsset *)asset;
 
-- (void)playAsset:(id)sender;
-- (void)pauseAsset:(id)sender;
+- (void)playAsset:(nullable id)sender;
+- (void)pauseAsset:(nullable id)sender;
 
 @end
+
+NS_ASSUME_NONNULL_END

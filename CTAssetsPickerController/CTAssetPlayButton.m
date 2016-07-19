@@ -2,7 +2,7 @@
  
  MIT License (MIT)
  
- Copyright (c) 2013 Clement CN Tsang
+ Copyright (c) 2015 Clement CN Tsang
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -121,9 +121,10 @@
 - (void)setupColorView
 {
     UIView *colorView = [UIView newAutoLayoutView];
-    colorView.backgroundColor = [UIColor whiteColor];
+    colorView.backgroundColor = [UIColor colorWithWhite:1 alpha:0.8];
     colorView.userInteractionEnabled = NO;
     self.colorView = colorView;
+    
     [self addSubview:self.colorView];
 }
 
@@ -167,9 +168,12 @@
     [super updateConstraints];
 }
 
+
+#pragma mark - States
+
 - (void)setHighlighted:(BOOL)highlighted
 {
-    [super setHighlighted:highlighted];
+    super.highlighted = highlighted;
     self.highlightedView.hidden = !highlighted;
 }
 

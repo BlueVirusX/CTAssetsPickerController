@@ -2,7 +2,7 @@
  
  MIT License (MIT)
  
- Copyright (c) 2013 Clement CN Tsang
+ Copyright (c) 2015 Clement CN Tsang
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -27,9 +27,10 @@
 #import <UIKit/UIKit.h>
 #import "CTAssetItemViewController.h"
 #import "CTAssetPlayButton.h"
+#import "CTAssetSelectionButton.h"
 
 
-
+NS_ASSUME_NONNULL_BEGIN
 
 extern NSString * const CTAssetScrollViewDidTapNotification;
 extern NSString * const CTAssetScrollViewPlayerWillPlayNotification;
@@ -38,11 +39,14 @@ extern NSString * const CTAssetScrollViewPlayerWillPauseNotification;
 
 @interface CTAssetScrollView : UIScrollView
 
-@property (nonatomic, strong, readonly) UIImage *image;
-@property (nonatomic, strong, readonly) AVPlayer *player;
+@property (nonatomic, assign) BOOL allowsSelection;
+
+@property (nonatomic, strong, readonly, nullable) UIImage *image;
+@property (nonatomic, strong, readonly, nullable) AVPlayer *player;
 
 @property (nonatomic, strong, readonly) UIImageView *imageView;
 @property (nonatomic, strong, readonly) CTAssetPlayButton *playButton;
+@property (nonatomic, strong, readonly) CTAssetSelectionButton *selectionButton;
 
 
 - (void)startActivityAnimating;
@@ -50,8 +54,8 @@ extern NSString * const CTAssetScrollViewPlayerWillPauseNotification;
 
 - (void)setProgress:(CGFloat)progress;
 
-- (void)bind:(PHAsset *)asset image:(UIImage *)image requestInfo:(NSDictionary *)info;
-- (void)bind:(AVPlayerItem *)playerItem requestInfo:(NSDictionary *)info;
+- (void)bind:(PHAsset *)asset image:(nullable UIImage *)image requestInfo:(nullable NSDictionary<NSString*, id> *)info;
+- (void)bind:(AVPlayerItem *)playerItem requestInfo:(nullable NSDictionary *)info;
 
 - (void)updateZoomScalesAndZoom:(BOOL)zoom;
 
@@ -59,3 +63,5 @@ extern NSString * const CTAssetScrollViewPlayerWillPauseNotification;
 - (void)pauseVideo;
 
 @end
+
+NS_ASSUME_NONNULL_END

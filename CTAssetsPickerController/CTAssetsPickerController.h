@@ -2,7 +2,7 @@
  
  MIT License (MIT)
  
- Copyright (c) 2013 Clement CN Tsang
+ Copyright (c) 2015 Clement CN Tsang
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@
 #import <Photos/Photos.h>
 
 
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol CTAssetsPickerControllerDelegate;
 
@@ -48,7 +49,7 @@
  *  You can specify which albums and their order to be shown in the picker by creating an `NSArray` of `NSNumber`
  *  that containing the value of `PHAssetCollectionSubtype`.
  */
-@property (nonatomic, copy) NSArray *assetCollectionSubtypes;
+@property (nonatomic, copy) NSArray<NSNumber*> *assetCollectionSubtypes;
 
 /**
  *  Set the `defaultAssetCollection` to specify which asset collection (album) is the default asset collection.
@@ -86,6 +87,13 @@
 @property (nonatomic, strong) NSMutableArray *selectedAssets;
 
 /**
+ *  An optional title for the done button
+ *
+ *  You can override the title of "Done" button by this value.
+ */
+@property (nonatomic, copy) NSString *doneButtonTitle;
+
+/**
  *  Determines whether or not the cancel button is visible in the picker.
  *
  *  The cancel button is visible by default. To hide the cancel button, (e.g. presenting the picker in `UIPopoverController`)
@@ -118,6 +126,14 @@
  *  set this property’s value to `YES`.
  */
 @property (nonatomic, assign) BOOL alwaysEnableDoneButton;
+
+/**
+ *  Determines whether or not the selection order is shown in the grid view.
+ *
+ *  Only a checkmark is shown on selected assets by default. To shows the order of selection,
+ *  set this property’s value to `YES`.
+ */
+@property (nonatomic, assign) BOOL showsSelectionIndex;
 
 /**
  *  The split view controller of the picker hierarchy. (read-only)
@@ -180,7 +196,7 @@
  *
  *  @see assetsPickerControllerDidCancel:
  */
-- (void)assetsPickerController:(CTAssetsPickerController *)picker didFinishPickingAssets:(NSArray *)assets;
+- (void)assetsPickerController:(CTAssetsPickerController *)picker didFinishPickingAssets:(NSArray<PHAsset*> *)assets;
 
 @optional
 
@@ -354,3 +370,5 @@ extern NSString * const CTAssetsPickerDidDeselectAssetNotification;
 
 
 @end
+
+NS_ASSUME_NONNULL_END

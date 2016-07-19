@@ -2,7 +2,7 @@
  
  MIT License (MIT)
  
- Copyright (c) 2013 Clement CN Tsang
+ Copyright (c) 2015 Clement CN Tsang
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@
 
 
 
-
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  *  A view controller that shows selected photos and vidoes from user's photo library that let the user navigate the item page by page.
@@ -62,6 +62,8 @@
  *
  *  @return An instance of `CTAssetPageViewController` initialized to show the asset items in `assets`.
  */
-- (instancetype)initWithAssets:(NSArray *)assets;
+- (instancetype)initWithAssets:(NSArray<PHAsset*> *)assets;
 
 @end
+
+NS_ASSUME_NONNULL_END

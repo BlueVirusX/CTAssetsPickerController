@@ -2,7 +2,7 @@
  
  MIT License (MIT)
  
- Copyright (c) 2013 Clement CN Tsang
+ Copyright (c) 2015 Clement CN Tsang
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
  */
 
 #import <PureLayout/PureLayout.h>
+#import "CTAssetsPickerDefines.h"
 #import "CTAssetsGridViewFooter.h"
 #import "NSNumberFormatter+CTAssetsPickerController.h"
 #import "NSBundle+CTAssetsPickerController.h"
@@ -57,22 +58,18 @@
     return self;
 }
 
+
 #pragma mark - Setup
 
 - (void)setupViews
 {
     UILabel *label = [UILabel newAutoLayoutView];
     label.textAlignment = NSTextAlignmentCenter;
-    self.label = label;
+    label.font = CTAssetsGridViewFooterFont;
+    label.textColor = CTAssetsGridViewFooterTextColor;
     
-    [self setupFonts];
-     
+    self.label = label;
     [self addSubview:self.label];
-}
-
-- (void)setupFonts
-{
-    self.label.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
 }
 
 
@@ -85,10 +82,8 @@
 
 - (void)setFont:(UIFont *)font
 {
-    if (!font)
-        self.label.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
-    else
-        self.label.font = font;
+    UIFont *labelFont = (font) ? font : CTAssetsGridViewFooterFont;
+    self.label.font = labelFont;
 }
 
 - (UIColor *)textColor
@@ -98,10 +93,8 @@
 
 - (void)setTextColor:(UIColor *)textColor
 {
-    if (!textColor)
-        self.label.textColor = [UIColor darkTextColor];
-    else
-        self.label.textColor = textColor;
+    UIColor *color = (textColor) ? textColor : CTAssetsGridViewFooterTextColor;
+    self.label.textColor = color;
 }
 
 
@@ -123,15 +116,26 @@
 {
     NSNumberFormatter *nf = [NSNumberFormatter new];
     
-    NSString *numberOfVideos = [nf ctassetsPickerStringFromAssetsCount:[result countOfAssetsWithMediaType:PHAssetMediaTypeVideo]];
-    NSString *numberOfPhotos = [nf ctassetsPickerStringFromAssetsCount:[result countOfAssetsWithMediaType:PHAssetMediaTypeImage]];
+    NSString *numberOfVideos = @"";
+    NSString *numberOfPhotos = @"";
     
-    if ([numberOfVideos isEqualToString:@"0"])
+    NSUInteger videoCount = [result countOfAssetsWithMediaType:PHAssetMediaTypeVideo];
+    NSUInteger photoCount = [result countOfAssetsWithMediaType:PHAssetMediaTypeImage];
+    
+    if (videoCount > 0)
+        numberOfVideos = [nf ctassetsPickerStringFromAssetsCount:videoCount];
+    
+    if (photoCount > 0)
+        numberOfPhotos = [nf ctassetsPickerStringFromAssetsCount:photoCount];
+    
+    if (photoCount > 0 && videoCount > 0)
+        self.label.text = [NSString stringWithFormat:CTAssetsPickerLocalizedString(@"%@ Photos, %@ Videos", nil), numberOfPhotos, numberOfVideos];
+    else if (photoCount > 0 && videoCount <= 0)
         self.label.text = [NSString stringWithFormat:CTAssetsPickerLocalizedString(@"%@ Photos", nil), numberOfPhotos];
-    else if ([numberOfPhotos isEqualToString:@"0"])
+    else if (photoCount <= 0 && videoCount > 0)
         self.label.text = [NSString stringWithFormat:CTAssetsPickerLocalizedString(@"%@ Videos", nil), numberOfVideos];
     else
-        self.label.text = [NSString stringWithFormat:CTAssetsPickerLocalizedString(@"%@ Photos, %@ Videos", nil), numberOfPhotos, numberOfVideos];
+        self.label.text = @"";
     
     self.hidden = (result.count == 0);
     

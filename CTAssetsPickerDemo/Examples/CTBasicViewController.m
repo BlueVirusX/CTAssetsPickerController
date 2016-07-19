@@ -2,7 +2,7 @@
  
  MIT License (MIT)
  
- Copyright (c) 2013 Clement CN Tsang
+ Copyright (c) 2015 Clement CN Tsang
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
  */
 
 #import "CTBasicViewController.h"
+#import "PHImageManager+CTAssetsPickerController.h"
 
 
 #define tableViewRowHeight 80.0f
@@ -99,7 +100,8 @@
             picker.delegate = self;
             
             // to present picker as a form sheet in iPad
-            picker.modalPresentationStyle = UIModalPresentationFormSheet;
+            if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+                picker.modalPresentationStyle = UIModalPresentationFormSheet;
             
             // present picker
             [self presentViewController:picker animated:YES completion:nil];
@@ -129,7 +131,7 @@
 
     PHAsset *asset = [self.assets objectAtIndex:indexPath.row];
     cell.textLabel.text         = [self.dateFormatter stringFromDate:asset.creationDate];
-    cell.detailTextLabel.text   = [NSString stringWithFormat:@"%ld X %ld", (unsigned long)asset.pixelWidth, (unsigned long)asset.pixelHeight];
+    cell.detailTextLabel.text   = [NSString stringWithFormat:@"%ld X %ld", (long)asset.pixelWidth, (long)asset.pixelHeight];
     cell.accessoryType          = UITableViewCellAccessoryDisclosureIndicator;
     cell.clipsToBounds          = YES;
 
@@ -137,7 +139,7 @@
     CGFloat scale = UIScreen.mainScreen.scale;
     CGSize targetSize = CGSizeMake(tableViewRowHeight * scale, tableViewRowHeight * scale);
 
-    [manager requestImageForAsset:asset
+    [manager ctassetsPickerRequestImageForAsset:asset
                        targetSize:targetSize
                       contentMode:PHImageContentModeAspectFill
                           options:self.requestOptions

@@ -2,7 +2,7 @@
  
  MIT License (MIT)
  
- Copyright (c) 2013 Clement CN Tsang
+ Copyright (c) 2015 Clement CN Tsang
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -30,10 +30,10 @@
 @interface CTAssetThumbnailStacks : UIView
 
 @property (nonatomic, assign) CGSize thumbnailSize;
-@property (nonatomic, copy, readonly) NSArray *thumbnailViews;
+@property (nonatomic, copy, readonly) NSArray<CTAssetThumbnailView*> *thumbnailViews;
 @property (nonatomic, assign, readonly) UIEdgeInsets edgeInsets;
 
-- (CTAssetThumbnailView *)thumbnailAtIndex:(NSUInteger)index;
+- (nonnull CTAssetThumbnailView *)thumbnailAtIndex:(NSUInteger)index;
 - (void)setHighlighted:(BOOL)highlighted;
 
 @end

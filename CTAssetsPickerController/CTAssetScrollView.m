@@ -2,7 +2,7 @@
  
  MIT License (MIT)
  
- Copyright (c) 2013 Clement CN Tsang
+ Copyright (c) 2015 Clement CN Tsang
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -57,6 +57,7 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
 @property (nonatomic, strong) UIProgressView *progressView;
 @property (nonatomic, strong) UIActivityIndicatorView *activityView;
 @property (nonatomic, strong) CTAssetPlayButton *playButton;
+@property (nonatomic, strong) CTAssetSelectionButton *selectionButton;
 
 @property (nonatomic, assign) BOOL shouldUpdateConstraints;
 @property (nonatomic, assign) BOOL didSetupConstraints;
@@ -77,6 +78,7 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
     if (self)
     {
         _shouldUpdateConstraints            = YES;
+        self.allowsSelection                = NO;
         self.showsVerticalScrollIndicator   = NO;
         self.showsHorizontalScrollIndicator = NO;
         self.bouncesZoom                    = YES;
@@ -106,25 +108,25 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
     imageView.isAccessibilityElement    = YES;
     imageView.accessibilityTraits       = UIAccessibilityTraitImage;
     self.imageView = imageView;
-    
     [self addSubview:self.imageView];
     
     UIProgressView *progressView =
     [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
     self.progressView = progressView;
-    
     [self addSubview:self.progressView];
     
     UIActivityIndicatorView *activityView =
     [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
-    
     self.activityView = activityView;
-    
     [self addSubview:self.activityView];
     
     CTAssetPlayButton *playButton = [CTAssetPlayButton newAutoLayoutView];
     self.playButton = playButton;
     [self addSubview:self.playButton];
+    
+    CTAssetSelectionButton *selectionButton = [CTAssetSelectionButton newAutoLayoutView];
+    self.selectionButton = selectionButton;
+    [self addSubview:self.selectionButton];
 }
 
 
@@ -134,16 +136,26 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
 {
     if (!self.didSetupConstraints)
     {
+        [self updateSelectionButtonIfNeeded];
         [self autoPinEdgesToSuperviewEdgesWithInsets:UIEdgeInsetsZero];
         [self updateProgressConstraints];
         [self updateActivityConstraints];
-        [self updateButtonConstraints];
+        [self updateButtonsConstraints];
         
         self.didSetupConstraints = YES;
     }
 
     [self updateContentFrame];
     [super updateConstraints];
+}
+
+- (void)updateSelectionButtonIfNeeded
+{
+    if (!self.allowsSelection)
+    {
+        [self.selectionButton removeFromSuperview];
+        self.selectionButton = nil;
+    }
 }
 
 - (void)updateProgressConstraints
@@ -167,10 +179,20 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
     [self.activityView autoAlignAxis:ALAxisHorizontal toSameAxisOfView:self.superview];
 }
 
-- (void)updateButtonConstraints
+- (void)updateButtonsConstraints
 {
     [self.playButton autoAlignAxis:ALAxisVertical toSameAxisOfView:self.superview];
     [self.playButton autoAlignAxis:ALAxisHorizontal toSameAxisOfView:self.superview];
+    
+    [NSLayoutConstraint autoSetPriority:UILayoutPriorityDefaultLow forConstraints:^{
+        [self.selectionButton autoConstrainAttribute:ALAttributeTrailing toAttribute:ALAttributeTrailing ofView:self.superview withOffset:-self.layoutMargins.right relation:NSLayoutRelationEqual];
+        [self.selectionButton autoConstrainAttribute:ALAttributeBottom toAttribute:ALAttributeBottom ofView:self.superview withOffset:-self.layoutMargins.bottom relation:NSLayoutRelationEqual];
+    }];
+    
+    [NSLayoutConstraint autoSetPriority:UILayoutPriorityDefaultHigh forConstraints:^{
+        [self.selectionButton autoConstrainAttribute:ALAttributeTrailing toAttribute:ALAttributeTrailing ofView:self.imageView withOffset:-self.layoutMargins.right relation:NSLayoutRelationLessThanOrEqual];
+        [self.selectionButton autoConstrainAttribute:ALAttributeBottom toAttribute:ALAttributeBottom ofView:self.imageView withOffset:-self.layoutMargins.bottom relation:NSLayoutRelationLessThanOrEqual];
+    }];
 }
 
 - (void)updateContentFrame
@@ -194,6 +216,7 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
 - (void)startActivityAnimating
 {
     [self.playButton setHidden:YES];
+    [self.selectionButton setHidden:YES];
     [self.activityView startAnimating];
     [self postPlayerWillPlayNotification];
 }
@@ -201,6 +224,7 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
 - (void)stopActivityAnimating
 {
     [self.playButton setHidden:NO];
+    [self.selectionButton setHidden:NO];
     [self.activityView stopAnimating];
     [self postPlayerWillPauseNotification];
 }
@@ -210,9 +234,11 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
 
 - (void)setProgress:(CGFloat)progress
 {
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:(progress < 1)];
+#if !defined(CT_APP_EXTENSIONS)
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = progress < 1;
+#endif
     [self.progressView setProgress:progress animated:(progress < 1)];
-    [self.progressView setHidden:(progress == 1)];
+    self.progressView.hidden = progress == 1;
 }
 
 // To mimic image downloading progress
@@ -285,7 +311,7 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
 
     CALayer *layer = self.imageView.layer;
     [layer addSublayer:playerLayer];
-    [playerLayer setFrame:layer.bounds];
+    playerLayer.frame = layer.bounds;
     
     self.player = player;
 
@@ -461,11 +487,11 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
     UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapping:)];
     UITapGestureRecognizer *doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapping:)];
     
-    [doubleTap setNumberOfTapsRequired:2.0];
+    doubleTap.numberOfTapsRequired = 2.0;
     [singleTap requireGestureRecognizerToFail:doubleTap];
     
-    [singleTap setDelegate:self];
-    [doubleTap setDelegate:self];
+    singleTap.delegate = self;
+    doubleTap.delegate = self;
     
     [self addGestureRecognizer:singleTap];
     [self addGestureRecognizer:doubleTap];
@@ -497,7 +523,7 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
 
 - (void)scrollViewDidZoom:(UIScrollView *)scrollView
 {
-    [self setScrollEnabled:(self.zoomScale != self.perspectiveZoomScale)];
+    self.scrollEnabled = self.zoomScale != self.perspectiveZoomScale;
     
     if (self.shouldUpdateConstraints)
     {
@@ -511,7 +537,7 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
 {
-    return ![touch.view isDescendantOfView:self.playButton];
+    return !([touch.view isDescendantOfView:self.playButton] || [touch.view isDescendantOfView:self.selectionButton]);
 }
 
 
@@ -552,7 +578,7 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
         [self.player removeObserver:self forKeyPath:@"currentItem.loadedTimeRanges"];
     }
     @catch (NSException *exception) {
-        // do noting
+        // do nothing
     }
 }
 
@@ -570,7 +596,7 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
         [self.player removeObserver:self forKeyPath:@"rate"];
     }
     @catch (NSException *exception) {
-        // do noting
+        // do nothing
     }    
 }
 
@@ -581,9 +607,9 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
 {
     if (object == self.player && [keyPath isEqual:@"currentItem.loadedTimeRanges"])
     {
-        NSArray *timeRanges = [change objectForKey:NSKeyValueChangeNewKey];
+        NSArray *timeRanges = change[NSKeyValueChangeNewKey];
 
-        if (timeRanges && [timeRanges count])
+        if (timeRanges && timeRanges.count)
         {
             CMTimeRange timeRange = [timeRanges.firstObject CMTimeRangeValue];
             
@@ -631,6 +657,7 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
 {
     [self setProgress:1];
     [self.playButton setHidden:YES];
+    [self.selectionButton setHidden:YES];
     [self.activityView stopAnimating];
 }
 
@@ -638,6 +665,7 @@ NSString * const CTAssetScrollViewPlayerWillPauseNotification = @"CTAssetScrollV
 - (void)playerDidPause:(id)sender
 {
     [self.playButton setHidden:NO];
+    [self.selectionButton setHidden:NO];
 }
 
 - (void)playerDidLoadItem:(id)sender

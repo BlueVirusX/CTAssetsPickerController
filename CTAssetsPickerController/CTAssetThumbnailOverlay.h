@@ -2,7 +2,7 @@
  
  MIT License (MIT)
  
- Copyright (c) 2013 Clement CN Tsang
+ Copyright (c) 2015 Clement CN Tsang
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@
 
 @interface CTAssetThumbnailOverlay : UIView
 
-- (void)bind:(PHAsset *)asset duration:(NSString *)duration;
-- (void)bind:(PHAssetCollection *)assetCollection;
+- (void)bind:(nullable PHAsset *)asset duration:(nullable NSString *)duration;
+- (void)bind:(nullable PHAssetCollection *)assetCollection;
 
 @end

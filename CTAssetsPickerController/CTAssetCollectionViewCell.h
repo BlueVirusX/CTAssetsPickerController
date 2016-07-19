@@ -2,7 +2,7 @@
  
  MIT License (MIT)
  
- Copyright (c) 2013 Clement CN Tsang
+ Copyright (c) 2015 Clement CN Tsang
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -30,20 +30,25 @@
 
 
 
-@interface CTAssetCollectionViewCell : UITableViewCell <UIAppearance>
+@interface CTAssetCollectionViewCell : UITableViewCell
 
-@property (nonatomic, strong, readonly) CTAssetThumbnailStacks *thumbnailStacks;
+@property (nonatomic, strong, readonly, nonnull) CTAssetThumbnailStacks *thumbnailStacks;
 
-@property (nonatomic, weak) UIFont *titleFont UI_APPEARANCE_SELECTOR;
-@property (nonatomic, weak) UIColor *titleTextColor UI_APPEARANCE_SELECTOR;
+@property (nonatomic, weak, nullable) UIFont *titleFont UI_APPEARANCE_SELECTOR;
+@property (nonatomic, strong, nullable) UIColor *titleTextColor UI_APPEARANCE_SELECTOR;
+@property (nonatomic, strong, nullable) UIColor *selectedTitleTextColor UI_APPEARANCE_SELECTOR;
 
-@property (nonatomic, weak) UIFont *countFont UI_APPEARANCE_SELECTOR;
-@property (nonatomic, weak) UIColor *countTextColor UI_APPEARANCE_SELECTOR;
+@property (nonatomic, weak, nullable) UIFont *countFont UI_APPEARANCE_SELECTOR;
+@property (nonatomic, strong, nullable) UIColor *countTextColor UI_APPEARANCE_SELECTOR;
+@property (nonatomic, strong, nullable) UIColor *selectedCountTextColor UI_APPEARANCE_SELECTOR;
 
-@property (nonatomic, weak) UIColor *selectedBackgroundColor UI_APPEARANCE_SELECTOR;
+@property (nonatomic, strong, nullable) UIColor *accessoryColor UI_APPEARANCE_SELECTOR;
+@property (nonatomic, strong, nullable) UIColor *selectedAccessoryColor UI_APPEARANCE_SELECTOR;
+
+@property (nonatomic, weak, nullable) UIColor *selectedBackgroundColor UI_APPEARANCE_SELECTOR;
 
 
-- (instancetype)initWithThumbnailSize:(CGSize)size reuseIdentifier:(NSString *)reuseIdentifier;
-- (void)bind:(PHAssetCollection *)collection count:(NSUInteger)count;
+- (instancetype)initWithThumbnailSize:(CGSize)size reuseIdentifier:(nullable NSString *)reuseIdentifier;
+- (void)bind:(nonnull PHAssetCollection *)collection count:(NSUInteger)count;
 
 @end
