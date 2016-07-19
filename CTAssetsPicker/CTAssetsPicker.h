@@ -21,10 +21,16 @@ FOUNDATION_EXPORT const unsigned char CTAssetsPickerVersionString[];
 #import <CTAssetsPicker/CTAssetItemViewController.h>
 #import <CTAssetsPicker/CTAssetPlayButton.h>
 #import <CTAssetsPicker/CTAssetScrollView.h>
+#import <CTAssetsPicker/CTAssetSelectionButton.h>
+#import <CTAssetsPicker/CTAssetSelectionLabel.h>
+#import <CTAssetsPicker/CTAssetsGridSelectedView.h>
+#import <CTAssetsPicker/CTAssetsGridView.h>
 #import <CTAssetsPicker/CTAssetsGridViewCell.h>
 #import <CTAssetsPicker/CTAssetsGridViewController.h>
 #import <CTAssetsPicker/CTAssetsGridViewFooter.h>
 #import <CTAssetsPicker/CTAssetsGridViewLayout.h>
+#import <CTAssetsPicker/CTAssetsNavigationController.h>
+#import <CTAssetsPicker/CTAssetsPageView.h>
 #import <CTAssetsPicker/CTAssetsPageViewController.h>
 #import <CTAssetsPicker/CTAssetsPickerAccessDeniedView.h>
 #import <CTAssetsPicker/CTAssetsPickerController.h>
