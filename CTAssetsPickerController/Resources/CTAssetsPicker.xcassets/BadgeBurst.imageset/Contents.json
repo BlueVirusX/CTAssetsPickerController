@@ -2,6 +2,7 @@
   "images" : [
     {
       "idiom" : "universal",
+      "filename" : "BadgeBurst.png",
       "scale" : "1x"
     },
     {
