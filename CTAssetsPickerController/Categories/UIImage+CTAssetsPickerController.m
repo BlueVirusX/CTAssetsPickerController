@@ -31,7 +31,12 @@
 
 + (UIImage *)ctassetsPickerImageNamed:(NSString *)name
 {
+  if ([UIImage respondsToSelector:@selector(imageNamed:inBundle:compatibleWithTraitCollection:)]) {
     return [UIImage imageNamed:name inBundle:[NSBundle ctassetsPickerBundle] compatibleWithTraitCollection:nil];
+  }
+  else {
+    return [UIImage imageNamed:[NSString stringWithFormat:@"CTAssetsPicker.bundle/%@", name]];
+  }
 }
 
 @end
