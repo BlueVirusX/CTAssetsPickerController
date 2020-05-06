@@ -6,6 +6,7 @@
 //  Copyright © 2016 Clement T. All rights reserved.
 //
 
+#import <UIKit/UIKit.h>
 #import "PHImageManager+CTAssetsPickerController.h"
 
 @implementation PHImageManager (CTAssetsPickerController)
